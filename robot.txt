@@ -1,0 +1,47 @@
+# ============================================================
+# robots.txt — Roop Milan Salon
+# https://www.roopmilansalon.com/
+# ============================================================
+
+User-agent: *
+Allow: /
+
+# Disallow admin / server-side paths (future-proofing)
+Disallow: /admin/
+Disallow: /cgi-bin/
+Disallow: /tmp/
+Disallow: /*.json$
+Disallow: /manifest.json
+
+# Allow important assets
+Allow: /style.css
+Allow: /script.js
+Allow: /*.jpg
+Allow: /*.png
+Allow: /*.webp
+Allow: /*.svg
+
+# Sitemap location
+Sitemap: https://www.roopmilansalon.com/sitemap.xml
+
+# Crawl delay for well-behaved bots
+Crawl-delay: 1
+
+# Specific bot rules
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+# Block bad bots
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+User-agent: SemrushBot
+Crawl-delay: 10
