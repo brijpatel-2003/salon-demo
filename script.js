@@ -8,36 +8,55 @@
 
 "use strict";
 
+// Debug: Log when script loads
+console.log("✅ Script.js loaded successfully");
+
 /* ── DOM Ready wrapper ────────────────────────────────────── */
 document.addEventListener("DOMContentLoaded", () => {
+  console.log("✅ DOMContentLoaded fired - JavaScript is working!");
+
   /* ============================================================
      1. PAGE PRELOADER
      ============================================================ */
   const preloader = document.getElementById("preloader");
+  console.log("Preloader element:", preloader);
 
   /**
    * Hide the preloader after 2 seconds (matches the CSS animation).
    * Uses 'requestAnimationFrame' to avoid janky transitions.
    */
   function hidePreloader() {
-    if (!preloader) return;
+    if (!preloader) {
+      console.log("⚠️ Preloader element not found!");
+      return;
+    }
+    console.log("Hiding preloader...");
     preloader.classList.add("hidden");
     // Remove from DOM after transition ends to improve accessibility
+    // Also set a timeout fallback in case transitionend doesn't fire
     preloader.addEventListener(
       "transitionend",
       () => {
+        console.log("✅ Preloader transition ended, removing from DOM");
         preloader.remove();
       },
       { once: true },
     );
+    // Fallback: remove after 600ms even if transition doesn't fire
+    setTimeout(() => {
+      if (preloader && preloader.parentNode) {
+        console.log("✅ Fallback: Force removing preloader");
+        preloader.remove();
+      }
+    }, 600);
   }
 
-  // Minimum display: 2 s for brand impression, then hide
-  setTimeout(hidePreloader, 2000);
+  // Minimum display: 100ms for quick loading, then hide
+  setTimeout(hidePreloader, 100);
 
   // Also hide once full page resources are loaded
   window.addEventListener("load", () => {
-    setTimeout(hidePreloader, 400);
+    setTimeout(hidePreloader, 100);
   });
 
   /* ============================================================
@@ -63,7 +82,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const hamburger = document.getElementById("hamburger");
   const navLinks = document.getElementById("navLinks");
 
+  console.log("Hamburger element:", hamburger);
+  console.log("NavLinks element:", navLinks);
+
   function toggleMenu() {
+    console.log("🍔 Hamburger clicked!");
     if (!hamburger || !navLinks) return;
     const isOpen = hamburger.classList.toggle("active");
     navLinks.classList.toggle("open", isOpen);
@@ -80,7 +103,12 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.style.overflow = "";
   }
 
-  if (hamburger) hamburger.addEventListener("click", toggleMenu);
+  if (hamburger) {
+    console.log("✅ Adding click listener to hamburger");
+    hamburger.addEventListener("click", toggleMenu);
+  } else {
+    console.log("⚠️ Hamburger element not found!");
+  }
 
   // Close menu when a link is clicked
   if (navLinks) {
@@ -97,14 +125,27 @@ document.addEventListener("DOMContentLoaded", () => {
   /* ============================================================
      4. SMOOTH SCROLL  — handles hash-link clicks
      ============================================================ */
-  document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+  const smoothScrollAnchors = document.querySelectorAll('a[href^="#"]');
+  console.log(
+    `Found ${smoothScrollAnchors.length} anchor links for smooth scrolling`,
+  );
+
+  smoothScrollAnchors.forEach((anchor, i) => {
     anchor.addEventListener("click", function (e) {
+      console.log(`🔗 Anchor ${i} clicked:`, this.getAttribute("href"));
       const href = this.getAttribute("href");
-      if (href === "#") return;
+      if (href === "#") {
+        console.log("⚠️ href is just #, skipping");
+        return;
+      }
 
       const target = document.querySelector(href);
-      if (!target) return;
+      if (!target) {
+        console.log("⚠️ Target element not found:", href);
+        return;
+      }
 
+      console.log("✅ Preventing default and smooth scrolling to:", href);
       e.preventDefault();
 
       const navHeight = navbar ? navbar.offsetHeight : 0;
@@ -121,21 +162,31 @@ document.addEventListener("DOMContentLoaded", () => {
   const sections = document.querySelectorAll("section[id]");
   const navAnchors = document.querySelectorAll(".nav-link");
 
+  let navTicking = false;
+
   function updateActiveNavLink() {
-    const scrollPos = window.scrollY + (navbar ? navbar.offsetHeight : 0) + 80;
+    if (!navTicking) {
+      requestAnimationFrame(() => {
+        const scrollPos =
+          window.scrollY + (navbar ? navbar.offsetHeight : 0) + 80;
 
-    sections.forEach((section) => {
-      const top = section.offsetTop;
-      const bottom = top + section.offsetHeight;
+        sections.forEach((section) => {
+          const top = section.offsetTop;
+          const bottom = top + section.offsetHeight;
 
-      if (scrollPos >= top && scrollPos < bottom) {
-        navAnchors.forEach((a) => a.classList.remove("active"));
-        const active = document.querySelector(
-          `.nav-link[href="#${section.id}"]`,
-        );
-        if (active) active.classList.add("active");
-      }
-    });
+          if (scrollPos >= top && scrollPos < bottom) {
+            navAnchors.forEach((a) => a.classList.remove("active"));
+            const active = document.querySelector(
+              `.nav-link[href="#${section.id}"]`,
+            );
+            if (active) active.classList.add("active");
+          }
+        });
+
+        navTicking = false;
+      });
+      navTicking = true;
+    }
   }
 
   window.addEventListener("scroll", updateActiveNavLink, { passive: true });
@@ -290,7 +341,11 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   function openLightbox(index) {
-    if (!lightbox || !lightboxImages[index]) return;
+    console.log("📸 openLightbox called with index:", index);
+    if (!lightbox || !lightboxImages[index]) {
+      console.log("⚠️ Lightbox or image not found");
+      return;
+    }
     const data = lightboxImages[index];
     lightboxImg.src = data.src;
     lightboxImg.alt = data.alt;
@@ -298,13 +353,19 @@ document.addEventListener("DOMContentLoaded", () => {
     lightbox.hidden = false;
     document.body.style.overflow = "hidden";
     lightboxClose.focus();
+    console.log("✅ Lightbox opened");
   }
 
   function closeLightbox() {
-    if (!lightbox) return;
+    console.log("❌ closeLightbox called");
+    if (!lightbox) {
+      console.log("⚠️ Lightbox element not found");
+      return;
+    }
     lightbox.hidden = true;
     lightboxImg.src = "";
     document.body.style.overflow = "";
+    console.log("✅ Lightbox closed");
   }
 
   function showLightboxImage(index) {
@@ -326,10 +387,17 @@ document.addEventListener("DOMContentLoaded", () => {
     lightboxCaption.textContent = data.caption;
   }
 
-  if (lightboxClose) lightboxClose.addEventListener("click", closeLightbox);
+  if (lightboxClose) {
+    console.log("✅ Adding click listener to lightboxClose");
+    lightboxClose.addEventListener("click", closeLightbox);
+  } else {
+    console.log("⚠️ lightboxClose element not found");
+  }
 
   if (lightboxPrev) {
+    console.log("✅ Adding click listener to lightboxPrev");
     lightboxPrev.addEventListener("click", () => {
+      console.log("⬅️ Lightbox prev clicked");
       currentLightboxIndex =
         (currentLightboxIndex - 1 + lightboxImages.length) %
         lightboxImages.length;
@@ -338,7 +406,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   if (lightboxNext) {
+    console.log("✅ Adding click listener to lightboxNext");
     lightboxNext.addEventListener("click", () => {
+      console.log("➡️ Lightbox next clicked");
       currentLightboxIndex = (currentLightboxIndex + 1) % lightboxImages.length;
       showLightboxImage(currentLightboxIndex);
     });
@@ -501,6 +571,7 @@ document.addEventListener("DOMContentLoaded", () => {
      11. BACK TO TOP BUTTON
      ============================================================ */
   const backToTop = document.getElementById("backToTop");
+  console.log("BackToTop button:", backToTop);
 
   function handleBackToTop() {
     if (!backToTop) return;
@@ -512,9 +583,13 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   if (backToTop) {
+    console.log("✅ Adding click listener to backToTop");
     backToTop.addEventListener("click", () => {
+      console.log("⬆️ Back to top clicked!");
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
+  } else {
+    console.log("⚠️ backToTop button not found!");
   }
 
   window.addEventListener("scroll", handleBackToTop, { passive: true });
@@ -535,10 +610,18 @@ document.addEventListener("DOMContentLoaded", () => {
     heroImg &&
     window.matchMedia("(prefers-reduced-motion: no-preference)").matches
   ) {
+    let ticking = false;
+
     function handleParallax() {
-      const scrolled = window.scrollY;
-      if (scrolled < window.innerHeight) {
-        heroImg.style.transform = `scale(1) translateY(${scrolled * 0.2}px)`;
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          const scrolled = window.scrollY;
+          if (scrolled < window.innerHeight) {
+            heroImg.style.transform = `scale(1) translateY(${scrolled * 0.2}px)`;
+          }
+          ticking = false;
+        });
+        ticking = true;
       }
     }
     window.addEventListener("scroll", handleParallax, { passive: true });
@@ -616,4 +699,14 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
   }
+
+  /* ============================================================
+     DEBUG: Global click test
+     ============================================================ */
+  console.log("✅ Setting up global click test...");
+  document.addEventListener("click", (e) => {
+    console.log("🖱️ CLICK DETECTED!", e.target);
+  });
+
+  console.log("✅ All event listeners set up successfully!");
 }); // end DOMContentLoaded
